@@ -1,0 +1,25 @@
+{
+  "name": "coin-ts",
+  "version": "1.0.0",
+  "description": "Cryptocurrency data structure",
+  "repository": "https://github.com/seanseany/coin-ts",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "npm run build:live",
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "elliptic": "^6.4.0",
+    "immutable": "^4.0.0-rc.9",
+    "peer-exchange": "^2.2.0",
+    "wrtc": "0.0.63"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.58",
+    "nodemon": "^1.13.2",
+    "ts-node": "^4.0.2"
+  }
+}
