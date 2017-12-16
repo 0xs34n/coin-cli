@@ -2,20 +2,23 @@ const EC = require("elliptic").ec;
 const ec = new EC("secp256k1");
 
 class Wallet {
-  public readonly name: string;
-  public readonly publicKey: string;
-  private readonly _privateKey: string;
-  private readonly _password: string
+  private readonly keyPair = ec.genKeyPair();
+  private readonly password: string;
 
-  constructor(name) {
-    this.name = name;
-    const keyPair = ec.genKeyPair();
-    this.publicKey = keyPair.getPublic("hex");
-    this._privateKey = keyPair.getPrivate("hex");
+  constructor(password) {
+    this.password = password;
   }
 
-  get privateKey() {
-    return this._privateKey
+  get publicKey() {
+    return this.keyPair.getPublic("hex");
+  }
+
+  getPrivateKey(password) {
+    if (password === this.password) {
+      return this.keyPair.getPrivate("hex");
+    } else {
+      throw `Incorrect wallet password`;
+    }
   }
 }
 

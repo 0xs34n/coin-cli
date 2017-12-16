@@ -1,7 +1,7 @@
 import { List } from "immutable";
 import * as net from "net";
-import wrtc from "wrtc";
-import Exchange from "peer-exchange";
+const wrtc = require("wrtc");
+const Exchange = require("peer-exchange");
 import Block from "./Block";
 import Blockchain from "./Blockchain";
 import Node from "./Node";
@@ -28,7 +28,7 @@ interface Data {
 class Peer extends Node {
   public connectedPeers: List<any> = List();
 
-  startServer(port) {
+  startServer(port: number) {
     net.createServer(socket => p2p.accept(socket, (err, peer) => {
       if (err) {
         throw err;
@@ -41,7 +41,7 @@ class Peer extends Node {
   incomingConnection(peer) {
     this.connectedPeers = this.connectedPeers.push(peer);
     this.incomingDataHandler(peer);
-    this.initErrorHandler(peer);
+    this.peerErrorHandler(peer);
     this.sendData(peer, Action.getLatestBlock());
     this.sendData(peer, Action.getTransactions());
   }
@@ -51,8 +51,8 @@ class Peer extends Node {
   }
 
   incomingDataHandler(peer) {
-    peer.on('data', data => {
-      const dataObj = JSON.parse(data.toStirng('utf8'));
+    peer.on('data', (data) => {
+      const dataObj = JSON.parse(data.toString('utf8'));
       try {
         this.handleIncomingData(peer, dataObj);
       } catch(e) {
@@ -61,13 +61,13 @@ class Peer extends Node {
     })
   }
 
-  initErrorHandler(peer) {
-    peer.on("error", error => {
+  peerErrorHandler(peer) {
+    peer.on("error", (error) => {
       console.error(error);
     })
   }
 
-  handleIncomingData(peer, data) {
+  handleIncomingData(peer, data: Data) {
     switch(data.type) {
       case DataType.REQUEST_LATEST_BLOCK:
         this.sendData(peer, Action.getLatestBlock());
@@ -99,16 +99,17 @@ class Peer extends Node {
     }   
   }
 
-  handleReceivedBlockchain(peer, blockchain) {
+  handleReceivedBlockchain(peer, blockchain: string) {
     const receivedBlockchain: List<Block> = List(JSON.parse(blockchain));
     try {
       this.blockchain.chain = receivedBlockchain;
+      this.broadcastLatestBlock();
     } catch(e) {
       console.error(e);
     }
   }
 
-  handleReceivedLatestBlock(peer, block: Block) {
+  handleReceivedLatestBlock(peer, block: string) {
     const latestBlockReceived = JSON.parse(block);
     const latestBlockHeld = this.blockchain.latestBlock;
 
@@ -120,8 +121,40 @@ class Peer extends Node {
     }
   }
 
-  broadcast(data) {
+  broadcast(data: Data) {
     this.connectedPeers.forEach(peer => this.sendData(peer, data));
+  }
+
+  broadcastLatestBlock() {
+    this.broadcast(Action.sendLatestBlock(this.blockchain.latestBlock));
+  }
+
+  connectToPeer(host, port) {
+    const socket = net.connect(port, host, () =>
+      p2p.connect(socket, (err, peer) => {
+        if (err) {
+          throw err;
+        } else {
+          this.incomingConnection.call(this, peer);
+        }
+      })
+    );
+  }
+
+  closeConnection() {
+    p2p.close(err => {
+      throw err;
+    });
+  }
+
+  discoverPeers() {
+    p2p.getNewPeer((err, peer) => {
+      if (err) {
+        throw err;
+      } else {
+        this.incomingConnection.call(this, peer);
+      }
+    });
   }
 }
 

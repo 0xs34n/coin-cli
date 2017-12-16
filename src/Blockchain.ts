@@ -1,7 +1,7 @@
 import Block, { genesisBlock } from "./Block";
 import Transaction from "./Transaction";
 import { List } from "immutable";
-import crypto from "crypto";
+import * as crypto from "crypto";
 
 interface chain {
   chain: List<Block>;
@@ -12,19 +12,23 @@ interface chain {
   addBlock(block: Block);
 }
 
-class Blockchain implements chain {
+class Blockchain {
   private _chain: List<Block> = List([genesisBlock()]);
 
   get chain() {
     return this._chain;
   }
 
+  toString(): string {
+    return JSON.stringify(this.chain.toJS(), null, 2);
+  }
+
   get latestBlock(): Block {
-    return this.chain[this.chain.size - 1];
+    return this.chain.get(this.chain.size - 1);
   }
 
   get difficulty(): number {
-    return Math.round(this.chain.size / 50) + 1;
+    return Math.round(this.chain.size / 50) + 3;
   }
 
   set chain(chain: List<Block>) {
@@ -37,22 +41,13 @@ class Blockchain implements chain {
     }
   }
 
-  mine(transactions: List<Transaction>) {
-    const nextBlock = this.generateNextBlock(transactions);
-    try {
-      this.addBlock(nextBlock);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   addBlock(block: Block) {
     try {
       this.isValidNextBlock(block, this.latestBlock);
+      this.chain = this.chain.push(block);
     } catch (e) {
       throw `Failed to add block: ${e}`;
     }
-    this.chain = this.chain.push(block);
   }
 
   generateNextBlock(transactions: List<Transaction>): Block {

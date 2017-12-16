@@ -9,49 +9,82 @@ import Output from "./Output";
 import Transaction from "./Transaction";
 
 class Node {
-  protected blockchain: Blockchain = new Blockchain();
-  protected mempool: Mempool = new Mempool();
-  private wallet: Wallet
+  public blockchain: Blockchain = new Blockchain();
+  public mempool: Mempool = new Mempool();
+  public wallet: Wallet;
+  private readonly reward: number = 100;
 
-  newWallet(name) {
-    this.wallet = new Wallet(name);
+  newWallet(password: string) {
+    this.wallet = new Wallet(password);
   }
 
-  getBalance(): number {
-    const outputs = this.getUnspentInputs();
-    const balance = outputs.reduce((total, output) => total + output.amount, 0);
-    return balance;
+  mine(address: string = this.wallet.publicKey) {
+    const regTxs: List<Transaction> = this.mempool.getTransactionsForBlock();
+    const feeTx: Transaction = this.getFeeTransaction(regTxs, address);
+    const rewardTx: Transaction = this.rewardTransaction(address);
+    const txs: List<Transaction> = regTxs.concat(feeTx).concat(rewardTx);
+
+    const nextBlock = this.blockchain.generateNextBlock(txs);
+    try {
+      this.blockchain.addBlock(nextBlock);
+    } catch (e) {
+      throw e;
+    }
   }
 
-  createTransaction(payments: List<Payment>) {
+  getBalance(address: string = this.wallet.publicKey): number {
+    const inputs = this.getUnspentInputs();
+    const inputsForAddress = inputs.filter(input => input.address === address);
+    return inputsForAddress.reduce((total, input) => total + input.amount, 0);
+  }
+
+  createTransaction(payments: List<Payment>, password: string): Transaction {
     const paidTotal = payments.reduce((total, paid) => total + paid.amount, 0);
     const fee = payments.reduce((total, payment) => total + payment.fee, 0);
-    const unspentOutputs: List<Input> = this.getUnspentInputs();
+    const unspentInputs: List<Input> = this.getUnspentInputs();
 
     let inputTotal: number;
-    let inputs: List<Input> = unspentOutputs.takeUntil(output => {
+    let inputs: List<Input> = unspentInputs.takeUntil(output => {
       inputTotal = inputTotal + output.amount;
       return inputTotal >= paidTotal + fee;
     });
-    if (inputTotal < paidTotal + fee) {
-      throw `Insufficient funds: ${inputTotal} less than payment total ${paidTotal} + fee ${fee}`;
+
+    let outputs: List<Output> = payments.map(payment => ({
+      amount: payment.amount,
+      address: payment.address
+    }));
+    let change = inputTotal - paidTotal - fee;
+    if (change > 0) {
+      const changeOutput = { amount: change, address: this.wallet.publicKey };
+      outputs = outputs.push(changeOutput);
     }
 
-    let change = inputTotal - paidTotal - fee;
-    const changeOutput = { amount: change, address: this.wallet.publicKey };
-    const outputs: List<Output> = payments
-      .map(payment => ({ amount: payment.amount, address: payment.address }))
-      .push(changeOutput);
+    try {
+      inputs = this.signInputs(inputs, password);
+      this.mempool.addTransaction(new Transaction("regular", inputs, outputs));
+    } catch (err) {
+      throw `Failed to create transactions: ${err}`;
+    }
+  }
 
-    const transaction = new Transaction("regular", inputs, outputs);
-    this.mempool.addTransaction(transaction);
+  signInputs(inputs: List<Input>, password: string): List<Input> {
+    try {
+      const privateKey = this.wallet.getPrivateKey(password);
+      return inputs.map(input => {
+        input.sign(privateKey);
+        return input;
+      });
+    } catch (err) {
+      throw `Error signing inputs ${inputs}: ${err}`;
+    }
   }
 
   // helper
   getUnspentInputs(): List<Input> {
-    let inputs = Set(this.getInputs());
-    let outputs = Set(this.getOutputs());
-    const unspentOutputs = List(outputs.union(inputs));
+    let inputs = this.getInputs();
+    let outputs = this.getOutputs();
+    const unspentOutputs = outputs.filterNot(output => inputs.includes(output));
+    
     return unspentOutputs;
   }
 
@@ -78,13 +111,26 @@ class Node {
         tx.outputs.forEach(output => {
           if (output.address === this.wallet.publicKey) {
             let input = new Input(i, tx.hash, output.amount, output.address);
-            input.sign(this.wallet.privateKey);
             outputs = outputs.push(input);
           }
         });
       });
     });
     return outputs;
+  }
+
+  getFeeTransaction(regTxs: List<Transaction>, address: string): Transaction {
+    const totalFee = regTxs.reduce((total, transaction) => {
+      return total + transaction.fee;
+    }, 0);
+
+    const outputs: List<Output> = List([{ address, amount: totalFee }]);
+    return new Transaction("fee", List(), outputs);
+  }
+
+  rewardTransaction(address: string): Transaction {
+    const outputs: List<Output> = List([{ address, amount: this.reward }]);
+    return new Transaction("reward", List(), outputs);
   }
 }
 

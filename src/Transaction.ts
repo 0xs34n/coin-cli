@@ -15,6 +15,7 @@ class Transaction implements TransactionInterface {
   public readonly type: "regular" | "fee" | "reward";
   public readonly inputs: List<Input>;
   public readonly outputs: List<Output>;
+  public static readonly reward: number = 100;
 
   constructor(
     type: "regular" | "fee" | "reward",
@@ -48,12 +49,21 @@ class Transaction implements TransactionInterface {
     return this.inputTotal - this.outputTotal;
   }
 
-  isInputsMoreThanOutputs(): boolean {
-    return this.inputTotal >= this.outputTotal;
+  isInputsMoreThanOutputs() {
+    const inputTotal = this.inputTotal;
+    const outputTotal = this.outputTotal;
+
+    if (inputTotal < outputTotal) {
+      throw `Insufficient balance: inputs ${inputTotal} < outputs ${outputTotal}`;
+    }
   }
-  
-  verifyInputSignatures(): boolean {
-    return this.inputs.every(input => input.verifySignature());
+
+  verifyInputSignatures() {
+    try {
+      this.inputs.forEach(input => input.verifySignature());
+    } catch (err) {
+      throw err;
+    }
   }
 
   hasEqualInputs(tx): boolean {
@@ -61,9 +71,13 @@ class Transaction implements TransactionInterface {
   }
 
   isValidTransaction(): boolean {
-    const isValidBalance = this.isInputsMoreThanOutputs();
-    const isValidSignatures = this.verifyInputSignatures();
-    return isValidBalance && isValidSignatures;
+    try {
+      this.isInputsMoreThanOutputs();
+      this.verifyInputSignatures();
+      return true;
+    } catch (err) {
+      throw err;
+    }
   }
 
   equals(tx): boolean {
@@ -77,6 +91,26 @@ class Transaction implements TransactionInterface {
 
   hashCode(): number {
     return parseInt(String(parseInt(this.hash, 10)), 32);
+  }
+
+  feeTransaction(address: string) {
+    const inputTotal = this.inputTotal;
+    const outputTotal = this.outputTotal;
+
+    if (inputTotal > outputTotal) {
+      const fee = inputTotal - outputTotal;
+      const outputs: List<Output> = List([{ address, amount: fee }]);
+      return new Transaction("fee", List(), outputs);
+    } else {
+      throw `No fees for transaction`;
+    }
+  }
+
+  static rewardTransaction(address: string) {
+    const outputs: List<Output> = List([
+      { address, amount: Transaction.reward }
+    ]);
+    return new Transaction("reward", List(), outputs);
   }
 }
 

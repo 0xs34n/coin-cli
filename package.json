@@ -2,11 +2,15 @@
   "name": "coin-ts",
   "version": "1.0.0",
   "description": "Cryptocurrency data structure",
-  "repository": "https://github.com/seanseany/coin-ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seanseany/coin-ts"
+  },
   "main": "./src/index.ts",
   "scripts": {
     "start": "npm run build:live",
-    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+    "build:live": "nodemon --watch './src/*.ts' --exec ./node_modules/.bin/ts-node ./index.ts",
+    "test": "nyc --reporter=lcov --require ts-node/register tape test/**/*.test.{ts,js} | tap-spec; nyc report ---reporter=text"
   },
   "keywords": [],
   "author": "",
@@ -15,11 +19,17 @@
     "elliptic": "^6.4.0",
     "immutable": "^4.0.0-rc.9",
     "peer-exchange": "^2.2.0",
+    "vorpal": "^1.12.0",
     "wrtc": "0.0.63"
   },
   "devDependencies": {
     "@types/node": "^8.0.58",
+    "@types/tape": "^4.2.31",
     "nodemon": "^1.13.2",
-    "ts-node": "^4.0.2"
+    "nyc": "^11.3.0",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.8.0",
+    "ts-node": "^4.0.2",
+    "typescript": "^2.6.2"
   }
 }

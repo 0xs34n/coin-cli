@@ -1,6 +1,4 @@
-import { Map } from "immutable";
-
-interface Payment extends Map<string, any>{
+interface Payment {
   amount: number,
   address: string,
   fee: number

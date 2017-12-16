@@ -14,10 +14,11 @@ class Mempool implements pool {
   private readonly blockSize: number = 5;
 
   addTransaction(transaction: Transaction) {
-    if(transaction.isValidTransaction() && !this.isDoubleSpent(transaction)) {
-      this.transactions = this.transactions.add(transaction);
-    } else {
-      console.error(`Transaction ${transaction} is invalid or double spent`);
+    try {
+      transaction.isValidTransaction();
+      this.isDoubleSpent(transaction);
+    } catch(err) {
+      throw err;
     }
   }
 
@@ -29,9 +30,12 @@ class Mempool implements pool {
   }
 
   isDoubleSpent(transaction: Transaction): boolean {
-    return this.transactions.some(tx =>
+    const isDoubleSpent = this.transactions.some(tx =>
       tx.inputs.some(input => transaction.hasEqualInputs(input))
     );
+    if(isDoubleSpent) {
+      throw `Transaction ${transaction} is double spent.`
+    }
   }
 
   clearTransactions(transactionsToClear: Set<Transaction>) {
@@ -40,6 +44,10 @@ class Mempool implements pool {
 
   removeTransaction(transaction: Transaction) {
     this.transactions = this.transactions.filter(tx => !tx.equals(transaction));
+  }
+
+  toString(): string {
+    return JSON.stringify(this.transactions.toJS(), null, 2);
   }
 }
 

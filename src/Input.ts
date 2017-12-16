@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
-import EC from "elliptic";
-const ec = new EC.ec("secp256k1");
+const EC = require("elliptic").ec;
+const ec = new EC("secp256k1");
 
 interface InputInterface {
   readonly txHash: string;
@@ -42,13 +42,15 @@ class Input implements InputInterface {
       .digest("hex");
   }
 
-  verifySignature(): boolean {
+  verifySignature() {
     const inputHash = crypto
       .createHash("sha256")
       .update(this.txHash + this.txIndex + this.amount + this.address)
       .digest("hex");
     const key = ec.keyFromPublic(this.address, "hex");
-    return key.verify(inputHash, this.signature);
+    if (!key.verify(inputHash, this.signature)) {
+      throw `Input ${this} has wrong signature.`;
+    }
   }
 
   sign(secretKey) {
