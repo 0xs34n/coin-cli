@@ -9,7 +9,7 @@
   "main": "./src/index.ts",
   "scripts": {
     "start": "npm run build:live",
-    "build:live": "nodemon --watch './src/*.ts' --exec ./node_modules/.bin/ts-node ./index.ts",
+    "build:live": "ts-node ./index.ts",
     "test": "nyc --reporter=lcov --require ts-node/register tape test/**/*.test.{ts,js} | tap-spec; nyc report ---reporter=text"
   },
   "keywords": [],

@@ -2,17 +2,7 @@ import * as crypto from "crypto";
 const EC = require("elliptic").ec;
 const ec = new EC("secp256k1");
 
-interface InputInterface {
-  readonly txHash: string;
-  readonly txIndex: number;
-  readonly amount: number;
-  readonly address: string;
-  readonly signature: string;
-
-  verifySignature(): boolean;
-}
-
-class Input implements InputInterface {
+class Input {
   public readonly txHash: string;
   public readonly txIndex: number;
   public readonly amount: number;
@@ -23,12 +13,14 @@ class Input implements InputInterface {
     txIndex: number,
     txHash: string,
     amount: number,
-    address: string
+    address: string,
+    signature?: string
   ) {
     this.txIndex = txIndex;
     this.txHash = txHash;
     this.amount = amount;
     this.address = address;
+    if (signature) this._signature = signature;
   }
 
   get signature() {
@@ -42,6 +34,13 @@ class Input implements InputInterface {
       .digest("hex");
   }
 
+  sign(secretKey) {
+    const key = ec.keyFromPrivate(secretKey);
+    const signature = key.sign(this.hash);
+
+    this._signature = signature.toDER();  
+  }
+
   verifySignature() {
     const inputHash = crypto
       .createHash("sha256")
@@ -51,13 +50,6 @@ class Input implements InputInterface {
     if (!key.verify(inputHash, this.signature)) {
       throw `Input ${this} has wrong signature.`;
     }
-  }
-
-  sign(secretKey) {
-    const key = ec.keyFromPrivate(secretKey);
-    const signature = key.sign(this.hash).toDER();
-
-    this._signature = signature;
   }
 
   equals(input: Input): boolean {
@@ -71,6 +63,12 @@ class Input implements InputInterface {
 
   hashCode(input: Input): number {
     return parseInt(String(parseInt(this.hash, 10)), 32);
+  }
+
+  static fromJS(json): Input {
+    const { txIndex, txHash, amount, address, _signature } = json;
+    const input = new Input(txIndex, txHash, amount, address, _signature);
+    return input;
   }
 }
 

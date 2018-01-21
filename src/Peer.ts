@@ -1,132 +1,128 @@
-import { List } from "immutable";
+import { List, isImmutable } from "immutable";
 import * as net from "net";
-const wrtc = require("wrtc");
-const Exchange = require("peer-exchange");
+import * as wrtc from "wrtc";
+import * as Exchange from "peer-exchange";
 import Block from "./Block";
 import Blockchain from "./Blockchain";
 import Node from "./Node";
 import Transaction from "./Transaction";
 import Input from "./Input";
-const p2p = new Exchange('coin', { wrtc: wrtc });
+import Message from "./Message";
+import MessageType from "./MessageType";
+import MessageCreator from "./MessageCreator";
 
-enum DataType {
-  REQUEST_LATEST_BLOCK,
-  RECEIVE_LATEST_BLOCK,
-  REQUEST_BLOCKCHAIN,
-  RECEIVE_BLOCKCHAIN,
-  REQUEST_TRANSACTIONS,
-  RECEIVE_LATEST_TRANSACTION,
-  RECEIVE_TRANSACTIONS,
-  RECEIVE_REMOVE_TRANSACTION
-}
-
-interface Data {
-  type: DataType;
-  data?: any;
-}
+const p2p = new Exchange("coin", { wrtc: wrtc });
 
 class Peer extends Node {
   public connectedPeers: List<any> = List();
 
   startServer(port: number) {
-    net.createServer(socket => p2p.accept(socket, (err, peer) => {
-      if (err) {
-        throw err;
-      } else {
-        this.incomingConnection.call(this, peer);
-      }
-    })).listen(port);
+    net
+      .createServer(socket =>
+        p2p.accept(socket, (err, peer) => {
+          if (err) {
+            throw err;
+          } else {
+            this.incomingConnection.call(this, peer);
+          }
+        })
+      )
+      .listen(port);
   }
 
   incomingConnection(peer) {
     this.connectedPeers = this.connectedPeers.push(peer);
-    this.incomingDataHandler(peer);
+    this.incomingMsgHandler(peer);
     this.peerErrorHandler(peer);
-    this.sendData(peer, Action.getLatestBlock());
-    this.sendData(peer, Action.getTransactions());
+    this.sendMsg(peer, MessageCreator.getLatestBlock());
+    this.sendMsg(peer, MessageCreator.getTransactions());
   }
 
-  sendData(peer, data: Data) {
-    peer.write(JSON.stringify(data));
+  sendMsg(peer, payload: Message) {
+    const payloadStr = JSON.stringify(payload);
+    peer.write(payloadStr);
   }
 
-  incomingDataHandler(peer) {
-    peer.on('data', (data) => {
-      const dataObj = JSON.parse(data.toString('utf8'));
+  incomingMsgHandler(peer) {
+    peer.on("data", message => {
+      const messageJS = JSON.parse(message.toString("utf8"));
       try {
-        this.handleIncomingData(peer, dataObj);
-      } catch(e) {
-        console.error(e);
-      }
-    })
+        this.handleIncomingMsg(peer, messageJS);
+      } catch (e) {}
+    });
   }
 
   peerErrorHandler(peer) {
-    peer.on("error", (error) => {
-      console.error(error);
-    })
+    peer.on("error", e => {});
   }
 
-  handleIncomingData(peer, data: Data) {
-    switch(data.type) {
-      case DataType.REQUEST_LATEST_BLOCK:
-        this.sendData(peer, Action.getLatestBlock());
+  handleIncomingMsg(peer, message: Message) {
+    switch (message.type) {
+      case MessageType.REQUEST_LATEST_BLOCK:
+        const latestBlock = this.blockchain.latestBlock;
+        this.sendMsg(peer, MessageCreator.sendLatestBlock(latestBlock));
         break;
-      case DataType.REQUEST_BLOCKCHAIN:
-        this.sendData(peer, Action.getBlockchain());
+      case MessageType.REQUEST_BLOCKCHAIN:
+        const chain = this.blockchain.chain;
+        this.sendMsg(peer, MessageCreator.sendBlockchain(chain));
         break;
-      case DataType.RECEIVE_BLOCKCHAIN:
-        this.handleReceivedBlockchain(peer, data.data);
+      case MessageType.RECEIVE_BLOCKCHAIN:
+        this.handleReceivedBlockchain(peer, message.payload);
         break;
-      case DataType.RECEIVE_LATEST_BLOCK:
-        this.handleReceivedLatestBlock(peer, data.data);
+      case MessageType.RECEIVE_LATEST_BLOCK:
+        this.handleReceivedLatestBlock(peer, message.payload);
         break;
-      case DataType.REQUEST_TRANSACTIONS:
-        this.sendData(peer, Action.getTransactions());
+      case MessageType.REQUEST_TRANSACTIONS:
+        this.sendMsg(peer, MessageCreator.getTransactions());
         break;
-      case DataType.RECEIVE_TRANSACTIONS:
-        const receivedTransactions = JSON.parse(data.data);
-        receivedTransactions.forEach(tx => this.mempool.addTransaction(tx));
+      case MessageType.RECEIVE_TRANSACTIONS:
+        const receivedTransactions = message.payload;
+        receivedTransactions.forEach(transactionJS => {
+          const transaction = Transaction.fromJS(transactionJS);
+          this.mempool.addTransaction(transaction);
+        });
         break;
-      case DataType.RECEIVE_LATEST_TRANSACTION:
-        this.mempool.addTransaction(data.data);
+      case MessageType.RECEIVE_LATEST_TRANSACTION:
+        this.mempool.addTransaction(Transaction.fromJS(message.payload));
         break;
-      case DataType.RECEIVE_REMOVE_TRANSACTION:
-        this.mempool.removeTransaction(JSON.parse(data.data))
+      case MessageType.RECEIVE_REMOVE_TRANSACTION:
+        this.mempool.removeTransaction(Transaction.fromJS(message.payload));
         break;
       default:
-        throw `Invalid data type from ${peer}`;
-    }   
+        throw `Invalid message type ${message.type} from ${peer}`;
+    }
   }
 
-  handleReceivedBlockchain(peer, blockchain: string) {
-    const receivedBlockchain: List<Block> = List(JSON.parse(blockchain));
+  handleReceivedBlockchain(peer, blockchain) {
+    const receivedBlockchain: List<Block> = Blockchain.fromJS(blockchain);
     try {
       this.blockchain.chain = receivedBlockchain;
-      this.broadcastLatestBlock();
-    } catch(e) {
-      console.error(e);
+      this.broadcast(
+        MessageCreator.sendLatestBlock(this.blockchain.latestBlock)
+      );
+    } catch (e) {
+      throw e;
     }
   }
 
-  handleReceivedLatestBlock(peer, block: string) {
-    const latestBlockReceived = JSON.parse(block);
+  handleReceivedLatestBlock(peer, block) {
+    const latestBlockReceived = {
+      ...block,
+      transactions: List(block.transactions.map(tx => Transaction.fromJS(tx)))
+    };
     const latestBlockHeld = this.blockchain.latestBlock;
-
     try {
       this.blockchain.addBlock(latestBlockReceived);
-    } catch(e) {
-      console.error(e);
-      this.sendData(peer, Action.getBlockchain());
+      this.broadcast(MessageCreator.sendLatestBlock(latestBlockReceived));
+    } catch (e) {
+      throw e;
+    } finally {
+      this.sendMsg(peer, MessageCreator.getBlockchain());
     }
   }
 
-  broadcast(data: Data) {
-    this.connectedPeers.forEach(peer => this.sendData(peer, data));
-  }
-
-  broadcastLatestBlock() {
-    this.broadcast(Action.sendLatestBlock(this.blockchain.latestBlock));
+  broadcast(data: Message) {
+    this.connectedPeers.forEach(peer => this.sendMsg(peer, data));
   }
 
   connectToPeer(host, port) {
@@ -159,51 +155,3 @@ class Peer extends Node {
 }
 
 export default Peer;
-
-abstract class Action {
-  public static getLatestBlock(): Data {
-    return {
-      type: DataType.REQUEST_LATEST_BLOCK
-    };
-  }
-
-  public static sendLatestBlock(block: Block): Data {
-    return {
-      type: DataType.RECEIVE_LATEST_BLOCK,
-      data: block
-    };
-  }
-
-  public static getBlockchain(): Data {
-    return {
-      type: DataType.REQUEST_BLOCKCHAIN
-    };
-  }
-
-  public static sendBlockchain(blockchain: List<Block>): Data {
-    return {
-      type: DataType.RECEIVE_BLOCKCHAIN,
-      data: blockchain
-    };
-  }
-
-  public static getTransactions(): Data {
-    return {
-      type: DataType.REQUEST_TRANSACTIONS
-    };
-  }
-
-  public static sendTransactions(transactions: List<Transaction>): Data {
-    return {
-      type: DataType.RECEIVE_TRANSACTIONS,
-      data: transactions
-    };
-  }
-
-  public static sendRemoveTransaction(transaction: Transaction): Data {
-    return {
-      type: DataType.RECEIVE_REMOVE_TRANSACTION,
-      data: transaction
-    };
-  }
-}

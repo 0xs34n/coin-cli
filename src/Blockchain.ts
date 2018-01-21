@@ -3,15 +3,6 @@ import Transaction from "./Transaction";
 import { List } from "immutable";
 import * as crypto from "crypto";
 
-interface chain {
-  chain: List<Block>;
-  readonly difficulty: number; // difficulty starts from 1 and increases to 2 @ block 25 - then increases by 1 every 50 blocks
-  readonly latestBlock: Block;
-
-  generateNextBlock(transactions: List<Transaction>): Block;
-  addBlock(block: Block);
-}
-
 class Blockchain {
   private _chain: List<Block> = List([genesisBlock()]);
 
@@ -19,8 +10,13 @@ class Blockchain {
     return this._chain;
   }
 
-  toString(): string {
-    return JSON.stringify(this.chain.toJS(), null, 2);
+  set chain(chain: List<Block>) {
+    try {
+      this.shouldReplaceChain(chain);
+      this._chain = chain;
+    } catch (e) {
+      throw e;
+    }
   }
 
   get latestBlock(): Block {
@@ -29,16 +25,6 @@ class Blockchain {
 
   get difficulty(): number {
     return Math.round(this.chain.size / 50) + 3;
-  }
-
-  set chain(chain: List<Block>) {
-    try {
-      if (this.shouldReplaceChain(chain)) {
-        this._chain = chain;
-      }
-    } catch (e) {
-      throw e;
-    }
   }
 
   addBlock(block: Block) {
@@ -64,7 +50,7 @@ class Blockchain {
       nonce
     );
 
-    // hashcash proof-of-work
+    // hashcash proof-of-work: loop until nonce yields hash that passes difficulty.
     while (!this.isHashDifficult(hash)) {
       nonce = nonce + 1;
       timestamp = new Date().getTime();
@@ -119,32 +105,29 @@ class Blockchain {
     return i >= this.difficulty;
   }
 
-  shouldReplaceChain(chain: List<Block>): boolean {
+  shouldReplaceChain(chain: List<Block>) {
     try {
-      this.isValidGenesis(chain);
-      this.isValidLength(chain);
+      this.isEqualGenesis(chain);
+      this.isChainLonger(chain);
       this.isValidBlocks(chain);
     } catch (e) {
       throw `Invalid Chain Error: ${e}`;
     }
-    return true;
   }
 
-  isValidGenesis(chain: List<Block>): boolean {
+  isEqualGenesis(chain: List<Block>) {
     if (JSON.stringify(chain.first()) !== JSON.stringify(this.chain.first())) {
       throw `Genesis ${chain.first()} is different from current genesis ${this.chain.first()}`;
     }
-    return true;
   }
 
-  isValidLength(chain: List<Block>): boolean {
+  isChainLonger(chain: List<Block>) {
     if (chain.size <= this.chain.size) {
-      throw `Length ${chain.size} shorter than length ${this.chain.size}`;
+      throw `New chain length ${chain.size} is shorter than current chain length ${this.chain.size}`;
     }
-    return true;
   }
 
-  isValidBlocks(chain: List<Block>): boolean {
+  isValidBlocks(chain: List<Block>) {
     let tempBlocks = List([chain.first()]);
     let nextBlock;
     let previousBlock;
@@ -160,7 +143,6 @@ class Blockchain {
       }
       tempBlocks = tempBlocks.push(nextBlock);
     }
-    return true;
   }
 
   isValidNextBlock(nextBlock: Block, previousBlock: Block): boolean {
@@ -172,36 +154,32 @@ class Blockchain {
     } catch (e) {
       throw `Invalid Block Error: ${e}`;
     }
-    return true;
   }
 
-  isValidIndex(nextBlock: Block, previousBlock: Block): boolean {
+  isValidIndex(nextBlock: Block, previousBlock: Block) {
     const previousIndex = previousBlock.index;
     const index = nextBlock.index;
 
     if (previousIndex + 1 !== index) {
       throw `Previous index ${previousIndex} should be 1 less than index ${index}`;
     }
-    return true;
   }
 
-  isValidPreviousHash(nextBlock: Block, previousBlock: Block): boolean {
+  isValidPreviousHash(nextBlock: Block, previousBlock: Block) {
     const previousHash = previousBlock.hash;
     const blockPreviousHash = nextBlock.previousHash;
 
     if (previousHash !== blockPreviousHash) {
       throw `Previous hash ${previousHash} should equal next previous hash ${blockPreviousHash}`;
     }
-    return true;
   }
 
-  isValidHash(nextBlock: Block): boolean {
+  isValidHash(nextBlock: Block) {
     const calculatedHash = this.calculateHashForBlock(nextBlock);
     const hash = nextBlock.hash;
     if (calculatedHash !== hash) {
       throw `Calculated hash ${calculatedHash} not equal hash ${hash}`;
     }
-    return true;
   }
 
   isValidDifficulty(block: Block) {
@@ -209,7 +187,24 @@ class Blockchain {
     if (!this.isHashDifficult(hash)) {
       throw `Hash ${hash} does not meet difficulty ${this.difficulty}`;
     }
-    return true;
+  }
+
+  static fromJS(json): List<Block> {
+    const chain: List<Block> = List(
+      json.map(block => {
+        return {
+          ...block,
+          transactions: List(
+            block.transactions.map(tx => Transaction.fromJS(tx))
+          )
+        };
+      })
+    );
+    return chain;
+  }
+
+  toString(): string {
+    return JSON.stringify(this.chain.toJS(), null, 2);
   }
 }
 

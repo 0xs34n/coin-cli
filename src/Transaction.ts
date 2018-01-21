@@ -3,15 +3,7 @@ import Output from "./Output";
 import { List } from "immutable";
 import * as crypto from "crypto";
 
-interface TransactionInterface {
-  readonly type: "regular" | "fee" | "reward";
-  readonly inputs: List<Input>;
-  readonly outputs: List<Output>;
-  readonly hash: string;
-  readonly fee: number;
-}
-
-class Transaction implements TransactionInterface {
+class Transaction {
   public readonly type: "regular" | "fee" | "reward";
   public readonly inputs: List<Input>;
   public readonly outputs: List<Output>;
@@ -46,7 +38,11 @@ class Transaction implements TransactionInterface {
   }
 
   get fee(): number {
-    return this.inputTotal - this.outputTotal;
+    if (this.type === "regular") {
+      return this.inputTotal - this.outputTotal;
+    } else {
+      throw `Transaction type ${this.type} does not have fees`
+    }
   }
 
   isInputsMoreThanOutputs() {
@@ -66,7 +62,7 @@ class Transaction implements TransactionInterface {
     }
   }
 
-  hasEqualInputs(tx): boolean {
+  hasSameInput(tx): boolean {
     return tx.inputs.some(input => this.inputs.some(i => i.equals(input)));
   }
 
@@ -111,6 +107,12 @@ class Transaction implements TransactionInterface {
       { address, amount: Transaction.reward }
     ]);
     return new Transaction("reward", List(), outputs);
+  }
+
+  static fromJS(json) {
+    const inputs: List<Input> = List(json.inputs.map(input => Input.fromJS(input)))
+    const outputs: List<Output> = List(json.outputs);
+    return new Transaction(json.type, inputs, outputs);
   }
 }
 

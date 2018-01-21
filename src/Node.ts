@@ -9,8 +9,8 @@ import Output from "./Output";
 import Transaction from "./Transaction";
 
 class Node {
-  public blockchain: Blockchain = new Blockchain();
-  public mempool: Mempool = new Mempool();
+  public readonly blockchain: Blockchain = new Blockchain();
+  public readonly mempool: Mempool = new Mempool();
   public wallet: Wallet;
   private readonly reward: number = 100;
 
@@ -20,15 +20,20 @@ class Node {
 
   mine(address: string = this.wallet.publicKey) {
     const regTxs: List<Transaction> = this.mempool.getTransactionsForBlock();
-    const feeTx: Transaction = this.getFeeTransaction(regTxs, address);
     const rewardTx: Transaction = this.rewardTransaction(address);
-    const txs: List<Transaction> = regTxs.concat(feeTx).concat(rewardTx);
-
-    const nextBlock = this.blockchain.generateNextBlock(txs);
+    let txs: List<Transaction> = regTxs.push(rewardTx);
     try {
-      this.blockchain.addBlock(nextBlock);
-    } catch (e) {
-      throw e;
+      const feeTx: Transaction = this.getFeeTransaction(regTxs, address);
+      txs = txs.push(feeTx);
+    } catch(e) {
+      // log error but not fatal ?
+    } finally {
+      const nextBlock = this.blockchain.generateNextBlock(txs);
+      try {
+        this.blockchain.addBlock(nextBlock);
+      } catch (e) {
+        throw e;
+      }
     }
   }
 
@@ -61,7 +66,7 @@ class Node {
 
     try {
       inputs = this.signInputs(inputs, password);
-      this.mempool.addTransaction(new Transaction("regular", inputs, outputs));
+      return new Transaction("regular", inputs, outputs);
     } catch (err) {
       throw `Failed to create transactions: ${err}`;
     }
@@ -123,9 +128,12 @@ class Node {
     const totalFee = regTxs.reduce((total, transaction) => {
       return total + transaction.fee;
     }, 0);
-
-    const outputs: List<Output> = List([{ address, amount: totalFee }]);
-    return new Transaction("fee", List(), outputs);
+    if(totalFee > 0) {
+      const outputs: List<Output> = List([{ address, amount: totalFee }]);
+      return new Transaction("fee", List(), outputs);
+    } else {
+     throw "No fees in Transaction.";
+    }
   }
 
   rewardTransaction(address: string): Transaction {

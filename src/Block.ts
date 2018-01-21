@@ -21,4 +21,4 @@ export function genesisBlock(): Block {
   };
 }
 
-export default Block
+export default Block;

@@ -16,7 +16,8 @@ class Mempool implements pool {
   addTransaction(transaction: Transaction) {
     try {
       transaction.isValidTransaction();
-      this.isDoubleSpent(transaction);
+      this.isTransactionDoubleSpent(transaction);
+      this.transactions = this.transactions.add(transaction)
     } catch(err) {
       throw err;
     }
@@ -29,17 +30,19 @@ class Mempool implements pool {
     return List(transactionsForBlock);
   }
 
-  isDoubleSpent(transaction: Transaction): boolean {
-    const isDoubleSpent = this.transactions.some(tx =>
-      tx.inputs.some(input => transaction.hasEqualInputs(input))
-    );
-    if(isDoubleSpent) {
-      throw `Transaction ${transaction} is double spent.`
+  isTransactionDoubleSpent(transaction: Transaction) {
+    if(this.transactions.size !== 0) {
+      const isDoubleSpent = this.transactions.some(tx =>
+        tx.inputs.some(input => transaction.hasSameInput(input))
+      );
+      if(isDoubleSpent) {
+        throw `Transaction ${transaction} is double spent.`
+      }
     }
   }
 
   clearTransactions(transactionsToClear: Set<Transaction>) {
-    this.transactions = this.transactions.union(transactionsToClear);
+    this.transactions = this.transactions.subtract(transactionsToClear);
   }
 
   removeTransaction(transaction: Transaction) {

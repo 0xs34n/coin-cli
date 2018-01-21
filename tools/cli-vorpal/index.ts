@@ -1,6 +1,8 @@
-import Peer from "../src/Peer";
+import Peer, { MessageType, MessageCreator, Data } from "../../src/Peer";
 import { List } from "immutable";
-import Payment from "../src/Payment";
+import Block from "../../src/Block";
+import Payment from "../../src/Payment";
+import Transaction from "../../src/Transaction";
 const peer = new Peer();
 const vorpal = require("vorpal")();
 import * as util from "util";
@@ -19,7 +21,7 @@ function cli(vorpal) {
     .use(pay)
     .use(balance)
     .use(welcome)
-    .delimiter("coin 💸")
+    .delimiter("coin >")
     .show();
 }
 
@@ -40,7 +42,7 @@ function connect(vorpal) {
     .alias("c")
     .action((args, callback) => {
       try {
-        peer.connectToPeer(args.host, args.port);
+        peer.connectToPeer(args.host, args.port, this.log);
       } catch (err) {
         this.log(err);
       } finally {
@@ -93,7 +95,12 @@ function mine(vorpal) {
     .action((args, callback) => {
       try {
         peer.mine();
-        peer.broadcastLatestBlock();
+        const latestBlock: Block = peer.blockchain.latestBlock
+        const blockData: Data = MessageCreator.sendLatestBlock(latestBlock);
+        peer.broadcast(blockData);
+
+        const txsToClear: List<Transaction> = latestBlock.transactions;
+        txsToClear.forEach(tx => peer.broadcast(MessageCreator.sendRemoveTransaction(tx)));
       } catch (e) {
         if (e instanceof TypeError) {
           handleTypeError.call(this, e);
@@ -112,7 +119,7 @@ function open(vorpal) {
     .alias("o")
     .action((args, callback) => {
       try {
-        peer.startServer(args.port);
+        peer.startServer(args.port, this.log);
         this.log(`Listening to peers on ${args.port}`);
       } catch (err) {
         this.log(err);
@@ -180,6 +187,9 @@ function pay(vorpal) {
           List([{ amount, address, fee }]),
           password
         );
+        peer.mempool.addTransaction(transaction);
+        const action: Data = MessageCreator.sendLatestTransaction(transaction);
+        peer.broadcast(action);
       } catch (err) {
         this.log(err);
       } finally {
