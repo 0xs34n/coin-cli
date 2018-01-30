@@ -15,7 +15,7 @@
 ## 🎉 Features
 - 💰 Wallet with public and private key.
 - 💳 Make Payments between wallets.
-- 🔑 Inputs are signed with the wallet's private key.
+- 🔑 Transactions are signed with the wallet's private key.
 - 🔗 Blocks with index, hash, data, transactions, and timestamp.
 - ⛏ Proof-of-work implementation.
 - ⛓ In-memory JavaScript array to store the blockchain.
