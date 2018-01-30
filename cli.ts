@@ -1,31 +1,33 @@
-import Peer, { MessageType, MessageCreator, Data } from "../../src/Peer";
+#!/usr/bin/env ./node_modules/.bin/ts-node
+
+import Peer from "./src/Peer";
+import Message from "./src/Message";
+import MessageType from "./src/MessageType";
+import MessageCreator from "./src/MessageCreator";
 import { List } from "immutable";
-import Block from "../../src/Block";
-import Payment from "../../src/Payment";
-import Transaction from "../../src/Transaction";
+import Block from "./src/Block";
+import Payment from "./src/Payment";
+import Transaction from "./src/Transaction";
 const peer = new Peer();
 const vorpal = require("vorpal")();
 import * as util from "util";
 
-function cli(vorpal) {
-  vorpal
-    .use(connect)
-    .use(discover)
-    .use(blockchain)
-    .use(peers)
-    .use(mine)
-    .use(open)
-    .use(transaction)
-    .use(newWallet)
-    .use(getPublicKey)
-    .use(pay)
-    .use(balance)
-    .use(welcome)
-    .delimiter("coin >")
-    .show();
-}
+vorpal
+  .use(connect)
+  .use(discover)
+  .use(blockchain)
+  .use(peers)
+  .use(mine)
+  .use(open)
+  .use(transaction)
+  .use(newWallet)
+  .use(getPublicKey)
+  .use(pay)
+  .use(balance)
+  .use(welcome)
+  .delimiter("coin >")
+  .show();
 
-export default cli;
 
 // COMMANDS
 function welcome(vorpal) {
@@ -42,7 +44,7 @@ function connect(vorpal) {
     .alias("c")
     .action((args, callback) => {
       try {
-        peer.connectToPeer(args.host, args.port, this.log);
+        peer.connectToPeer(args.host, args.port);
       } catch (err) {
         this.log(err);
       } finally {
@@ -96,11 +98,11 @@ function mine(vorpal) {
       try {
         peer.mine();
         const latestBlock: Block = peer.blockchain.latestBlock
-        const blockData: Data = MessageCreator.sendLatestBlock(latestBlock);
-        peer.broadcast(blockData);
+        const blockMessage: Message = MessageCreator.sendLatestBlock(latestBlock);
+        peer.broadcast(blockMessage);
 
         const txsToClear: List<Transaction> = latestBlock.transactions;
-        txsToClear.forEach(tx => peer.broadcast(MessageCreator.sendRemoveTransaction(tx)));
+        txsToClear.forEach(tx => peer.broadcast(MessageCreator.sendRemovedTransaction(tx)));
       } catch (e) {
         if (e instanceof TypeError) {
           handleTypeError.call(this, e);
@@ -119,7 +121,7 @@ function open(vorpal) {
     .alias("o")
     .action((args, callback) => {
       try {
-        peer.startServer(args.port, this.log);
+        peer.startServer(args.port);
         this.log(`Listening to peers on ${args.port}`);
       } catch (err) {
         this.log(err);
@@ -188,7 +190,7 @@ function pay(vorpal) {
           password
         );
         peer.mempool.addTransaction(transaction);
-        const action: Data = MessageCreator.sendLatestTransaction(transaction);
+        const action: Message = MessageCreator.sendLatestTransaction(transaction);
         peer.broadcast(action);
       } catch (err) {
         this.log(err);
@@ -200,7 +202,7 @@ function pay(vorpal) {
 
 function balance(vorpal) {
   vorpal
-    .command("balance", "Balance of optional [address]")
+    .command("balance [address]", "Balance of optional [address]")
     .alias("b")
     .action((args, callback) => {
       try {

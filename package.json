@@ -6,11 +6,11 @@
     "type": "git",
     "url": "https://github.com/seanseany/coin-ts"
   },
-  "main": "./src/index.ts",
+  "main": "./cli.ts",
   "scripts": {
     "start": "npm run build:live",
-    "build:live": "ts-node ./index.ts",
-    "test": "nyc --reporter=lcov --require ts-node/register tape test/**/*.test.{ts,js} | tap-spec; nyc report ---reporter=text"
+    "build:live": "ts-node ./cli.ts",
+    "test": "ts-node node_modules/tape/bin/tape test/**/*.test.{ts,js} | tap-spec"
   },
   "keywords": [],
   "author": "",
@@ -26,7 +26,6 @@
     "@types/node": "^8.0.58",
     "@types/tape": "^4.2.31",
     "nodemon": "^1.13.2",
-    "nyc": "^11.3.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.8.0",
     "ts-node": "^4.0.2",

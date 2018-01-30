@@ -1,10 +1,19 @@
-import Block, { genesisBlock } from "./Block";
+import Block from "./Block";
 import Transaction from "./Transaction";
 import { List } from "immutable";
 import * as crypto from "crypto";
 
+const genesis: Block = {
+  index: 0,
+  previousHash: "0",
+  timestamp: 1509412270,
+  transactions: List(),
+  hash: "000a74a688a49ea784f3c7a4548febdc73ba6978691f39ac4a9dd6520cf8e89f",
+  nonce: 620
+}
+
 class Blockchain {
-  private _chain: List<Block> = List([genesisBlock()]);
+  private _chain: List<Block> = List([genesis]);
 
   get chain() {
     return this._chain;
@@ -145,7 +154,7 @@ class Blockchain {
     }
   }
 
-  isValidNextBlock(nextBlock: Block, previousBlock: Block): boolean {
+  isValidNextBlock(nextBlock: Block, previousBlock: Block) {
     try {
       this.isValidIndex(nextBlock, previousBlock);
       this.isValidPreviousHash(nextBlock, previousBlock);

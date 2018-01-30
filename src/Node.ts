@@ -48,16 +48,21 @@ class Node {
     const fee = payments.reduce((total, payment) => total + payment.fee, 0);
     const unspentInputs: List<Input> = this.getUnspentInputs();
 
-    let inputTotal: number;
+    let inputTotal: number = 0;
     let inputs: List<Input> = unspentInputs.takeUntil(output => {
-      inputTotal = inputTotal + output.amount;
-      return inputTotal >= paidTotal + fee;
+      if (inputTotal < paidTotal + fee ) {
+        inputTotal = inputTotal + output.amount;
+        return false;
+      } else {
+        return true;
+      }
     });
 
     let outputs: List<Output> = payments.map(payment => ({
       amount: payment.amount,
       address: payment.address
     }));
+    
     let change = inputTotal - paidTotal - fee;
     if (change > 0) {
       const changeOutput = { amount: change, address: this.wallet.publicKey };

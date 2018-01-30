@@ -1,15 +1,7 @@
 import Transaction from "./Transaction";
 import { Set, List } from "immutable";
 
-interface pool {
-  transactions: Set<Transaction>;
-
-  addTransaction(transaction: Transaction);
-  getTransactionsForBlock(): List<Transaction>;
-  clearTransactions(transactionsToClear: Set<Transaction>);
-}
-
-class Mempool implements pool {
+class Mempool {
   public transactions: Set<Transaction> = Set();
   private readonly blockSize: number = 5;
 
@@ -17,8 +9,8 @@ class Mempool implements pool {
     try {
       transaction.isValidTransaction();
       this.isTransactionDoubleSpent(transaction);
-      this.transactions = this.transactions.add(transaction)
-    } catch(err) {
+      this.transactions = this.transactions.add(transaction);
+    } catch (err) {
       throw err;
     }
   }
@@ -31,12 +23,12 @@ class Mempool implements pool {
   }
 
   isTransactionDoubleSpent(transaction: Transaction) {
-    if(this.transactions.size !== 0) {
+    if (this.transactions.size !== 0) {
       const isDoubleSpent = this.transactions.some(tx =>
-        tx.inputs.some(input => transaction.hasSameInput(input))
+        tx.hasSameInput(transaction)
       );
-      if(isDoubleSpent) {
-        throw `Transaction ${transaction} is double spent.`
+      if (isDoubleSpent) {
+        throw `Transaction ${transaction} is double spent.`;
       }
     }
   }
