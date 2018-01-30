@@ -55,57 +55,21 @@ $ npm install coin-cli -g
 $ coin
 ```
 
-## 🕹️ Command (alias) <inputs...>
-###### help [command...]
-- Provides help for a given command
-
-###### exit
-- Exits application.
-
-###### open <port>
-- Open port <port> to accept incoming connections.
-- Eg., `open 5000`
-- Alias is `o`
-
-###### connect <host> <port>
-- Connect to a new peer with <host> and <port>.
-- Eg., `connect localhost 5000 `
-- Alias is `c`
-
-###### blockchain
-- See the current state of the blockchain.
-- Alias is `bc`
-
-###### peers
-- Get the list of connected peers.
-- Alias is `p`
-
-###### mine [address]
-- Mine a new block with rewards going to optional [address]. 
-- Defaults to current wallet address
-- Eg., `mine` or `mine 040e05438372765a150b668860aa93160281c3ffbcc98c73a1608574f23597e548bf127280fe997ef7aa3205490b36045fad2edfed663e9df0f9be5f94baec17ab`
-- Alias is `m`
-
-###### transactions 
-- See unconfirmed transactions that can be mined.
-- Alias is `tx`
-
-###### wallet <password>
-- Create a new wallet with <password>
-- Eg., `wallet mypassword`
-- Alias is `w`
-
-###### key
-- Get your public key
-- Alias is `k`
-
-###### pay <address> <amount> <fee> <password>
-- Make a payment to <address> with <amount> and <fee> using wallet <password>
-- Eg., `pay 040e05438372765a150b668860aa93160281c3ffbcc98c73a1608574f23597e548bf127280fe997ef7aa3205490b36045fad2edfed663e9df0f9be5f94baec17ab 10 5 mypassword`
-- Alias is `p`
-
-###### balance [address]
-- Balance of optional [address]
+## 🕹️ Usage
+| Command                                  | Alias | Description                                                               | Example                    |
+|------------------------------------------|-------|---------------------------------------------------------------------------|----------------------------|
+| open <port>                              | o     | Open <port> to accept incoming connections.                               | open 5000                  |
+| connect <host> <port>                    | c     | Connect to a new peer with <host> and <peer>                              | connect localhost 5000     |
+| blockchain                               | bc    | See the current state of the blockchain.                                  |                            |
+| peers                                    | p     | Get the list of connected peers.                                          |                            |
+| mine [address]                           | m     | Mine a new block with rewards going to optional [address].                | mine or mine xxx...        |
+| transactions                             | tx    | See unconfirmed transactions that can be mined.                           |                            |
+| wallet <password>                        | w     | Create a new wallet with <password>                                       | wallet mypassword          |
+| key                                      | k     | Get your public key                                                       |                            |
+| pay <address> <amount> <fee> <password>  | p     | Make payment to <address> with <amount> and <fee> using wallet <password> | pay xxx... 10 5 mypassword |
+| balance [address]                        | b     | Balance of optional <address>                                             | balance or balance xxx...  |
+| help [command...]                        |       | Provides help for a given command                                         | help balance or help       |
+| exit                                     |       | Exits application.                                                        |                            |
 
 ## Implementation
 
