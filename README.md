@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-<h4 align="center">A minimal cryptocurrency CLI and implementation</h4>
+<h4 align="center">A minimal cryptocurrency CLI and implementation using TypeScript & Immutable.js</h4>
 
 <br>
 
