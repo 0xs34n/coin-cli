@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-<h4 align="center">A minimal cryptocurrency CLI and implementation using TypeScript & Immutable.js</h4>
+<h4 align="center">A minimal cryptocurrency CLI implementation in TypeScript & Immutable.js</h4>
 
 <br>
 
@@ -21,7 +21,7 @@
 - ⛓ In-memory JavaScript array to store the blockchain.
 - ✅ Block & Transaction integrity validation.
 - 📡 Decentralized and distributed peer-to-peer communication.
-- ✨ Minimal cryptocurrency implementation in 900 lines of code.
+- ✨ Minimal implementation in 900 lines of code.
 
 ## 📦 Installation
 
@@ -48,8 +48,8 @@ $ npm install
 $ npm start
 ```
 
-#### NPM
-
+#### [NPM]() 
+<!-- add npm link above -->
 ```bash
 $ npm install coin-cli -g
 $ coin
@@ -71,7 +71,8 @@ $ coin
 | help [command...]                        |       | Provides help for a given command                                         | help balance or help       |
 | exit                                     |       | Exits application.                                                        |                            |
 
-## Implementation
+## What is a cryptocurrency?
+
 
 
 
