@@ -1,5 +1,3 @@
-#!/usr/bin/env ./node_modules/.bin/ts-node
-
 import Peer from "./src/Peer";
 import Message from "./src/Message";
 import MessageType from "./src/MessageType";

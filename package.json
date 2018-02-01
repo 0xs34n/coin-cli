@@ -1,6 +1,6 @@
 {
   "name": "coin-ts",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "A minimal cryptocurrency CLI implementation in TypeScript & Immutable.js",
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "immutable": "^4.0.0-rc.9",
     "peer-exchange": "^2.2.0",
     "vorpal": "^1.12.0",
+    "ts-node": "^4.0.2",
     "wrtc": "0.0.63"
   },
   "devDependencies": {
@@ -31,7 +32,6 @@
     "nodemon": "^1.13.2",
     "tap-spec": "^4.1.1",
     "tape": "^4.8.0",
-    "ts-node": "^4.0.2",
     "typescript": "^2.6.2"
   }
 }
