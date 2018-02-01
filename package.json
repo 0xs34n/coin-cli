@@ -1,5 +1,5 @@
 {
-  "name": "coin-cli",
+  "name": "coin.cli",
   "version": "1.0.0",
   "description": "A minimal cryptocurrency CLI implementation in TypeScript & Immutable.js",
   "repository": {

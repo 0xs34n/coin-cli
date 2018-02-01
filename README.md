@@ -61,7 +61,7 @@ $ npm start
 <!-- add npm link above -->
 ```bash
 $ npm install ts-node -g
-$ npm install coin-cli -g
+$ npm install coin.cli -g
 $ coin
 ```
 
