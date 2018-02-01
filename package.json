@@ -6,6 +6,9 @@
     "type": "git",
     "url": "https://github.com/seanseany/coin-ts"
   },
+  "bin": {
+    "coin": "./cli.ts"
+  },
   "main": "./cli.ts",
   "scripts": {
     "start": "npm run build:live",
