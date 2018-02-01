@@ -57,14 +57,6 @@ $ npm install
 $ npm start
 ```
 
-#### [NPM]() 
-<!-- add npm link above -->
-```bash
-$ npm install ts-node -g
-$ npm install coin-ts -g
-$ coin
-```
-
 ## 🕹️ Usage
 | Command                                  | Alias | Description                                                               | Example                    |
 |------------------------------------------|-------|---------------------------------------------------------------------------|----------------------------|
