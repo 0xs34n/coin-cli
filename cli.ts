@@ -1,4 +1,4 @@
-#!/usr/bin/env ./node_modules/.bin/ts-node
+#!/usr/bin/env ts-node
 
 import Peer from "./src/Peer";
 import Message from "./src/Message";
@@ -31,7 +31,7 @@ vorpal
 
 // COMMANDS
 function welcome(vorpal) {
-  vorpal.log("Welcome to Coin CLI!");
+  this.log("Welcome to Coin CLI!");
   vorpal.exec("help");
 }
 

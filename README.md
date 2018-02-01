@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://coindemo.io" rel="noopener noreferrer" target="_blank"><img src="https://raw.githubusercontent.com/seanjameshan/coin-ts/master/logo.png" width="200"></a>
+  <a href="https://coindemo.io" rel="noopener noreferrer" target="_blank"><img src="https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/logo.png" width="200"></a>
   <br>
     <a href="https://coindemo.io" rel="noopener noreferrer" target="_blank">Coin CLI</a>
   <br>
@@ -10,7 +10,16 @@
 
 <br>
 
-![screenshot](https://raw.githubusercontent.com/seanjameshab/coin-ts/master/demo.gif)
+## Demo
+
+#### Connect
+![alt text](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/connect.gif)
+
+#### Mining
+![alt text](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/mine.png)
+
+#### Payment
+![alt text](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/pay.png)
 
 ## 🎉 Features
 - 💰 Wallet with public and private key.
@@ -51,6 +60,7 @@ $ npm start
 #### [NPM]() 
 <!-- add npm link above -->
 ```bash
+$ npm install ts-node -g
 $ npm install coin-cli -g
 $ coin
 ```
@@ -78,3 +88,4 @@ $ coin
 </h1>
 
 <br>
+
