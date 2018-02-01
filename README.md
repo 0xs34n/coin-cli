@@ -36,10 +36,10 @@ command line:
 
 ```bash
 # Clone this repository
-$ git clone https://github.com/seanseany/blockchain
+$ git clone https://github.com/seanjameshan/coin-cli
 
 # Go into the repository
-$ cd blockchain
+$ cd coin-cli
 
 # Install dependencies
 $ npm install
@@ -74,5 +74,7 @@ $ coin
 <br>
 
 <h1 align="center">
-<a href="https://www.buymeacoffee.com/seanhan"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" target="_blank"></a>
+<a rel="noopener noreferrer" target="_blank" href="https://www.buymeacoffee.com/seanhan"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" target="_blank"></a>
 </h1>
+
+<br>
