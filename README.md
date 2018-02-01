@@ -60,16 +60,16 @@ $ npm start
 ## 🕹️ Usage
 | Command                                  | Alias | Description                                                               | Example                    |
 |------------------------------------------|-------|---------------------------------------------------------------------------|----------------------------|
-| open <port>                              | o     | Open <port> to accept incoming connections.                               | open 5000                  |
-| connect <host> <port>                    | c     | Connect to a new peer with <host> and <peer>                              | connect localhost 5000     |
+| open <port>                              | o     | Open port to accept incoming connections.                               | open 5000                  |
+| connect <host> <port>                    | c     | Connect to a new peer with host and <peer>                              | connect localhost 5000     |
 | blockchain                               | bc    | See the current state of the blockchain.                                  |                            |
 | peers                                    | p     | Get the list of connected peers.                                          |                            |
 | mine [address]                           | m     | Mine a new block with rewards going to optional [address].                | mine or mine xxx...        |
 | transactions                             | tx    | See unconfirmed transactions that can be mined.                           |                            |
 | wallet <password>                        | w     | Create a new wallet with <password>                                       | wallet mypassword          |
 | key                                      | k     | Get your public key                                                       |                            |
-| pay <address> <amount> <fee> <password>  | p     | Make payment to <address> with <amount> and <fee> using wallet <password> | pay xxx... 10 5 mypassword |
-| balance [address]                        | b     | Balance of optional <address>                                             | balance or balance xxx...  |
+| pay <address> <amount> <fee> <password>  | p     | Make payment to address with <amount> and <fee> using wallet <password> | pay xxx... 10 5 mypassword |
+| balance [address]                        | b     | Balance of optional address                                             | balance or balance xxx...  |
 | help [command...]                        |       | Provides help for a given command                                         | help balance or help       |
 | exit                                     |       | Exits application.                                                        |                            |
 
