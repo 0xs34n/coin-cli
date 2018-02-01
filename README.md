@@ -13,13 +13,13 @@
 ## Demo
 
 #### Connect
-![alt text](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/connect.gif)
+![connect](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/connect.gif)
 
 #### Mining
-![alt text](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/mine.png)
+![mining](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/mine.png)
 
 #### Payment
-![alt text](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/pay.png)
+![payment](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/pay.png)
 
 ## 🎉 Features
 - 💰 Wallet with public and private key.
