@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://coindemo.io" rel="noopener noreferrer" target="_blank"><img src="https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/logo.png" width="200"></a>
+  <a href="https://coindemo.io" rel="noopener noreferrer" target="_blank"><img src="https://raw.githubusercontent.com/seanjameshan/coin-cli/tree/master/media/logo.png" width="200"></a>
   <br>
     <a href="https://coindemo.io" rel="noopener noreferrer" target="_blank">Coin CLI</a>
   <br>
@@ -13,13 +13,13 @@
 ## Demo
 
 #### Connect
-![connect](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/connect.gif)
+![connect](https://raw.githubusercontent.com/seanjameshan/coin-cli/tree/master/media/demo/connect.gif)
 
 #### Mining
-![mining](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/mine.png)
+![mining](https://raw.githubusercontent.com/seanjameshan/coin-cli/tree/master/media/demo/mine.png)
 
 #### Payment
-![payment](https://raw.githubusercontent.com/seanjameshan/coin-cli/master/media/demo/pay.png)
+![payment](https://raw.githubusercontent.com/seanjameshan/coin-cli/tree/master/media/demo/pay.png)
 
 ## 🎉 Features
 - 💰 Wallet with public and private key.
