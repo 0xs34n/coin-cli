@@ -1,13 +1,13 @@
 {
   "name": "coin-ts",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A minimal cryptocurrency CLI implementation in TypeScript & Immutable.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/seanjameshan/coin-cli"
   },
   "bin": {
-    "coin": "./cli.ts"
+    "coin": "ts-node ./cli.ts"
   },
   "main": "./cli.ts",
   "scripts": {
