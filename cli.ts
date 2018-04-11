@@ -144,9 +144,6 @@ function transaction(vorpal) {
 function newWallet(vorpal) {
   vorpal
     .command("wallet <password>", "Create a new wallet with <password>")
-    .types({
-      string: 'password'
-    })
     .alias("w")
     .action((args, callback) => {
       args.password = args.password.toString();
