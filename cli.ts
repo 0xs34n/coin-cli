@@ -146,6 +146,7 @@ function newWallet(vorpal) {
     .command("wallet <password>", "Create a new wallet with <password>")
     .alias("w")
     .action((args, callback) => {
+      args.password = args.password.toString();
       peer.newWallet(args.password);
       const hidePass = args.password.replace(/./g, "*");
       this.log(`Created new wallet with password ${hidePass}.\n`);
@@ -207,8 +208,8 @@ function balance(vorpal) {
     .action((args, callback) => {
       try {
         this.log(peer.getBalance(args.address))
-      } catch(e) {
-        if(e instanceof TypeError) {
+      } catch (e) {
+        if (e instanceof TypeError) {
           handleTypeError.call(this, e);
         }
       } finally {
