@@ -35,7 +35,9 @@ class Blockchain {
   get difficulty(): number {
     return Math.round(this.chain.size / 50) + 3;
   }
-
+  getIndexDifficulty(index: number) {
+    return Math.round(index / 50) + 3;
+  }
   addBlock(block: Block) {
     try {
       this.isValidNextBlock(block, this.latestBlock);
@@ -86,10 +88,10 @@ class Blockchain {
       .createHash("sha256")
       .update(
         index +
-          previousHash +
-          timestamp +
-          JSON.stringify(transactions.toJS()) +
-          nonce
+        previousHash +
+        timestamp +
+        JSON.stringify(transactions.toJS()) +
+        nonce
       )
       .digest("hex");
   }
@@ -105,11 +107,14 @@ class Blockchain {
     );
   }
 
-  isHashDifficult(hash: string): boolean {
+  isHashDifficult(hash: string, index?: number): boolean {
     for (var i = 0; i < hash.length; i += 1) {
       if (hash[i] !== "0") {
         break;
       }
+    }
+    if (Number.isInteger(index)) {
+      return i >= this.getIndexDifficulty(index);
     }
     return i >= this.difficulty;
   }
@@ -193,7 +198,7 @@ class Blockchain {
 
   isValidDifficulty(block: Block) {
     const hash = block.hash;
-    if (!this.isHashDifficult(hash)) {
+    if (!this.isHashDifficult(hash, block.index)) {
       throw `Hash ${hash} does not meet difficulty ${this.difficulty}`;
     }
   }
