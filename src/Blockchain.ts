@@ -104,7 +104,7 @@ class Blockchain {
     );
   }
 
-  isHashDifficult(hash: string, index?: number): boolean {
+  isHashDifficult(hash: string, index: number): boolean {
     for (var i = 0; i < hash.length; i += 1) {
       if (hash[i] !== "0") {
         break;
