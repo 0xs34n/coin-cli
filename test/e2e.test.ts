@@ -211,10 +211,10 @@ tape(('change difficulty test'), function (t: tape.Test) {
 
   node1.newWallet('pw1');
 
-  t.comment('node1 mines 25 to increase the difficulty');
-  for(let i = 0; i < 25; i++){
+  t.comment('node1 mines 26 to increase the difficulty');
+  for(let i = 0; i < 26; i++){
     node1.mine();
   }
-  t.equal(node1.getBalance(), 2500, 'should have balance 2500');
+  t.equal(node1.getBalance(), 2600, 'should have balance 2600');
   t.end();
 });
