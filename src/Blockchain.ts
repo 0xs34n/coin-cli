@@ -32,10 +32,9 @@ class Blockchain {
     return this.chain.get(this.chain.size - 1);
   }
 
-  get difficulty(): number {
-    return Math.round(this.chain.size / 50) + 3;
+  getDifficulty(index: number) {
+    return Math.round(index / 50) + 3;
   }
-
   addBlock(block: Block) {
     try {
       this.isValidNextBlock(block, this.latestBlock);
@@ -60,7 +59,7 @@ class Blockchain {
     );
 
     // hashcash proof-of-work: loop until nonce yields hash that passes difficulty.
-    while (!this.isHashDifficult(hash)) {
+    while (!this.isHashDifficult(hash, index)) {
       nonce = nonce + 1;
       timestamp = new Date().getTime();
       hash = this.calculateHash(
@@ -86,10 +85,10 @@ class Blockchain {
       .createHash("sha256")
       .update(
         index +
-          previousHash +
-          timestamp +
-          JSON.stringify(transactions.toJS()) +
-          nonce
+        previousHash +
+        timestamp +
+        JSON.stringify(transactions.toJS()) +
+        nonce
       )
       .digest("hex");
   }
@@ -105,13 +104,13 @@ class Blockchain {
     );
   }
 
-  isHashDifficult(hash: string): boolean {
+  isHashDifficult(hash: string, index: number): boolean {
     for (var i = 0; i < hash.length; i += 1) {
       if (hash[i] !== "0") {
         break;
       }
     }
-    return i >= this.difficulty;
+    return i >= this.getDifficulty(index);
   }
 
   shouldReplaceChain(chain: List<Block>) {
@@ -193,8 +192,8 @@ class Blockchain {
 
   isValidDifficulty(block: Block) {
     const hash = block.hash;
-    if (!this.isHashDifficult(hash)) {
-      throw `Hash ${hash} does not meet difficulty ${this.difficulty}`;
+    if (!this.isHashDifficult(hash, block.index)) {
+      throw `Hash ${hash} does not meet difficulty ${this.getDifficulty(block.index)}`;
     }
   }
 

@@ -139,10 +139,10 @@ tape(('complex payment'), function (t: tape.Test) {
   node7.blockchain.addBlock(node2.blockchain.chain.get(2));
 
   t.comment('node1 should have 34 coins');
-  t.equal(node1.getBalance(), 34); // 100 - 60 - 6 
+  t.equal(node1.getBalance(), 34); // 100 - 60 - 6
 
   t.comment('node2 should have 116 coins');
-  t.equal(node2.getBalance(), 116); 
+  t.equal(node2.getBalance(), 116);
 
   t.comment('node3 should have 10 coins');
   t.equal(node3.getBalance(), 10);
@@ -203,5 +203,18 @@ tape(('double spend test'), function (t: tape.Test) {
   t.equal(node1.blockchain.chain.get(2).transactions.get(0).equals(tx1), true);
   t.equal(node2.mempool.transactions.size, 0);
 
+  t.end();
+});
+
+tape(('change difficulty test'), function (t: tape.Test) {
+  const node1 = new Node();
+
+  node1.newWallet('pw1');
+
+  t.comment('node1 mines 26 to increase the difficulty');
+  for(let i = 0; i < 26; i++){
+    node1.mine();
+  }
+  t.equal(node1.getBalance(), 2600, 'should have balance 2600');
   t.end();
 });
