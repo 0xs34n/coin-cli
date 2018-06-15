@@ -1,4 +1,5 @@
 import * as crypto from "crypto";
+import Base58 from "./Base58";
 const EC = require("elliptic").ec;
 const ec = new EC("secp256k1");
 
@@ -46,7 +47,7 @@ class Input {
       .createHash("sha256")
       .update(this.txHash + this.txIndex + this.amount + this.address)
       .digest("hex");
-    const key = ec.keyFromPublic(this.address, "hex");
+    const key = ec.keyFromPublic(Base58.decodeAddress(this.address), "hex");
     if (!key.verify(inputHash, this.signature)) {
       throw `Input ${this} has wrong signature.`;
     }

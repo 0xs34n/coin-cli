@@ -19,11 +19,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bs58": "^4.0.1",
     "elliptic": "^6.4.0",
     "immutable": "^4.0.0-rc.9",
     "peer-exchange": "^2.2.0",
-    "vorpal": "^1.12.0",
     "ts-node": "^4.0.2",
+    "vorpal": "^1.12.0",
     "wrtc": "0.0.63"
   },
   "devDependencies": {
